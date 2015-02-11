@@ -1,47 +1,56 @@
+// Global Variables
+row1 = 63;
+row2 = 146;
+row3 = 229;
+rowStart = [row1, row2, row3];
+enemyMinSpeed = 150;
+enemyMaxSpeed = 400;
 // Enemies our player must avoid
-var Enemy = function() {
+
+function getRandomNumber(min, max){
+    return Math.random() * (max-min) + min;
+}
+
+var Enemy = function(x,y) {
     // Variables applied to each of our instances go here,
     // we've provided one for you to get started
 
     // The image/sprite for our enemies, this uses
     // a helper we've provided to easily load images
-    this.x = [0, 0, 0];
-    this.y = [63, 146, 229];
-    enemyRowStart = [63, 146, 229];    
+    this.x = x;
+    this.y = y; 
+    this.speed = getRandomNumber(enemyMinSpeed, enemyMaxSpeed) - 100;
+    // this.speed = enemySpeeds[(Math.floor(Math.random() * enemySpeeds.length))] - 100;
     this.sprite = 'images/enemy-bug.png';
+    // this.x = (Math.random() * 500) * 1000;
 }
 
 // Update the enemy's position, required method for game
 // Parameter: dt, a time delta between ticks
 Enemy.prototype.update = function(dt) {
 
-    // You should multiply any movement by the dt parameter
-    // which will ensure the game runs at the same speed for
-    // all computers.
-//    for (i = 0; i < this.x.length; i++) {
-        // if (i=0) {
-            this.x[0] = this.x[0] + 300 * dt;
-            if (this.x[0] >= ctx.canvas.width) {
-                this.x[0] = 0;
-                this.y[0] = enemyRowStart[Math.floor(Math.random() * enemyRowStart.length)];
-           }
-        //   if this.x
-    //      } else {
-    //          if (i=1) {
-    //              this.x[i] = this.x[i] + 200 * dt;
-    //          } else {
-    //              this.x[i] = this.x[i] + 300 * dt;
-    //                 }   
-    //             }
-    // }
+    
+
+
+// You should multiply any movement by the dt parameter
+// which will ensure the game runs at the same speed for
+// all computers.
+
+    if (this.x >= ctx.canvas.width) {
+       // this.x = -(Math.round(Math.random()*500));
+        this.x = -100;
+        this.y = rowStart[(Math.floor(Math.random() * rowStart.length))];
+    } else {
+        // this.x += Math.round(Math.random() * 500) * dt;
+        // this.x += Math.round(Math.random() * 400) * dt;
+        this.x += this.speed * dt;
+    }
 }
 
 // Draw the enemy on the screen, required method for game
 Enemy.prototype.render = function() {
-    for (i = 0; i < this.x.length; i++) {
-        ctx.drawImage(Resources.get(this.sprite), this.x[i], this.y[i]);
-    }
-}
+        ctx.drawImage(Resources.get(this.sprite), this.x, this.y);
+ }
 
 // Now write your own player class
 // This class requires an update(), render() and
@@ -76,13 +85,11 @@ Player.prototype.render = function() {
 
 var player =  new Player;
 
-var enemy = new Enemy;
-var enemy2 = new Enemy;
-var enemy3 = new Enemy;
+var enemy = new Enemy(-100, row1);
+var enemy2 = new Enemy(-100, row2);
+var enemy3 = new Enemy(-100, row3);
 
-var allEnemies = [];
-
-allEnemies.push (enemy,enemy2, enemy3)
+var allEnemies = [enemy, enemy2, enemy3];
 
 // This listens for key presses and sends the keys to your
 // Player.handleInput() method. You don't need to modify this.
