@@ -57,11 +57,38 @@ Enemy.prototype.render = function() {
 // a handleInput() method.
 
 
-var Player = function () {
+var Player = function (x,y) {
     
     this.sprite = 'images/char-boy.png';
-    this.x = 203;
-    this.y = 405;
+    this.startX = 203;
+    this.startY = 405;
+    this.x = x;
+    this.y = y;
+}
+
+Player.prototype.handleInput = function(key) {
+
+    var X = this.x;
+    var Y = this.y;
+
+    if (key === 'left') {
+      X -= 101;
+    }
+    if (key === 'up') {
+      Y -= 83;
+    }
+    if (key === 'right') {
+      X += 101;
+    }
+    if (key === 'down') {
+      Y += 83;
+    }
+    if (X > 0 && X < (ctx.canvas.width - 80)) {
+      this.x = X;
+    }
+    if (Y > -50 && Y < (ctx.canvas.height - 125)) {
+      this.y = Y;
+    }
 }
 
 // Update the enemy's position, required method for game
@@ -83,7 +110,7 @@ Player.prototype.render = function() {
 // Place all enemy objects in an array called allEnemies
 // Place the player object in a variable called player
 
-var player =  new Player;
+var player =  new Player(203, 405);
 
 var enemy = new Enemy(-100, row1);
 var enemy2 = new Enemy(-100, row2);
@@ -101,5 +128,5 @@ document.addEventListener('keyup', function(e) {
         40: 'down'
     };
 
-//    player.handleInput(allowedKeys[e.keyCode]);
+    player.handleInput(allowedKeys[e.keyCode]);
 });
