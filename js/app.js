@@ -1,61 +1,78 @@
-// Global Variables
+// Define Global Variables
+
+colStart = -100;
 row1 = 63;
 row2 = 146;
 row3 = 229;
 rowStart = [row1, row2, row3];
-enemyMinSpeed = 150;
-enemyMaxSpeed = 400;
-// Enemies our player must avoid
+enemyMinSpeed = 250;
+enemyMaxSpeed = 550;
+reason = "Collision"
+
+// Define Random Number Function --- used to establish each enemy's speed
 
 function getRandomNumber(min, max){
     return Math.random() * (max-min) + min;
 }
 
-var Enemy = function(x,y) {
-    // Variables applied to each of our instances go here,
-    // we've provided one for you to get started
+// Enemies our player must avoid --- include variables applicable to each enemy instance
 
-    // The image/sprite for our enemies, this uses
-    // a helper we've provided to easily load images
+var Enemy = function(x,y) {
+
     this.x = x;
     this.y = y; 
     this.speed = getRandomNumber(enemyMinSpeed, enemyMaxSpeed) - 100;
-    // this.speed = enemySpeeds[(Math.floor(Math.random() * enemySpeeds.length))] - 100;
+
+    // The image/sprite for our enemies, this uses
+    // a helper we've provided to easily load images
+
     this.sprite = 'images/enemy-bug.png';
-    // this.x = (Math.random() * 500) * 1000;
 }
 
 // Update the enemy's position, required method for game
 // Parameter: dt, a time delta between ticks
+
 Enemy.prototype.update = function(dt) {
-
-    
-
 
 // You should multiply any movement by the dt parameter
 // which will ensure the game runs at the same speed for
 // all computers.
 
+// If our enemy moves the end of the canvas, start him over on the other side
+// with a new randomly generated speed and in a randomly generated row
+// Otherwise, move the enemy from left to right at the randomly generated speed
+// and call function to check for collissions with the player
+
     if (this.x >= ctx.canvas.width) {
-       // this.x = -(Math.round(Math.random()*500));
         this.x = -100;
         this.y = rowStart[(Math.floor(Math.random() * rowStart.length))];
+        this.speed = getRandomNumber(enemyMinSpeed, enemyMaxSpeed) - 100;
     } else {
-        // this.x += Math.round(Math.random() * 500) * dt;
-        // this.x += Math.round(Math.random() * 400) * dt;
-        this.x += this.speed * dt;
+          this.x += this.speed * dt;
+          Enemy.prototype.CollisionCheck();
+    }
+}
+
+// Check to see if any of our enemies has collided with our player
+
+Enemy.prototype.CollisionCheck = function () {
+    for (i in allEnemies) {        
+        if (player.x > (allEnemies[i].x-60) && player.x < (allEnemies[i].x + 60))   {
+            if (player.y >= (allEnemies[i].y +10) && player.y <= (allEnemies[i].y + 55)) {
+                reason = "Collision"
+                pauseResetGame(reason, 1000);
+            }
+        }
     }
 }
 
 // Draw the enemy on the screen, required method for game
+
 Enemy.prototype.render = function() {
         ctx.drawImage(Resources.get(this.sprite), this.x, this.y);
  }
 
-// Now write your own player class
-// This class requires an update(), render() and
-// a handleInput() method.
-
+// Our player definition
 
 var Player = function (x,y) {
     
@@ -65,6 +82,8 @@ var Player = function (x,y) {
     this.x = x;
     this.y = y;
 }
+
+// Handle player movement based on keyboard input
 
 Player.prototype.handleInput = function(key) {
 
@@ -93,33 +112,58 @@ Player.prototype.handleInput = function(key) {
 
 // Update the enemy's position, required method for game
 // Parameter: dt, a time delta between ticks
+
 Player.prototype.update = function(dt) {
-    // You should multiply any movement by the dt parameter
-    // which will ensure the game runs at the same speed for
-    // all computers.
+
+// You should multiply any movement by the dt parameter
+// which will ensure the game runs at the same speed for
+// all computers.
+    this.x * dt; 
+    this.y * dt;
 }
 
+// Draw the player on the screen, required method for game
 
 Player.prototype.render = function() {
-    console.log(this.sprite, this.x, this.y);    
     ctx.drawImage(Resources.get(this.sprite), this.x, this.y);
-
 }
 
-// Now instantiate your objects.
-// Place all enemy objects in an array called allEnemies
-// Place the player object in a variable called player
+// Instantiate the player object
 
 var player =  new Player(203, 405);
 
-var enemy = new Enemy(-100, row1);
-var enemy2 = new Enemy(-100, row2);
-var enemy3 = new Enemy(-100, row3);
+// Instantiate all enemy objects and place in an array called allEnemies
 
-var allEnemies = [enemy, enemy2, enemy3];
+var enemy1 = new Enemy(colStart, row1);
+var enemy2 = new Enemy(colStart, row2);
+var enemy3 = new Enemy(colStart, row3);
+
+var allEnemies = [enemy1, enemy2, enemy3];
+
+// Upon a win or a collission pause to display message and then reset game
+
+function pauseResetGame(reason, ms) {
+    
+    if (reason = "Collision") {
+        alert("Oh Man");
+    } else {
+        alert("Winner, Winner - Chicken Dinner");
+    }
+
+    ms += new Date().getTime();
+    while (new Date() < ms) { }
+
+    player.x = player.startX;
+    player.y = player.startY;
+
+    while (allEnemies.length > 3) {    
+        allEnemies.pop(); 
+    }     
+} 
 
 // This listens for key presses and sends the keys to your
 // Player.handleInput() method. You don't need to modify this.
+
 document.addEventListener('keyup', function(e) {
     var allowedKeys = {
         37: 'left',
