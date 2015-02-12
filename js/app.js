@@ -7,7 +7,8 @@ row3 = 229;
 rowStart = [row1, row2, row3];
 enemyMinSpeed = 250;
 enemyMaxSpeed = 550;
-reason = "Collision"
+collision = false;
+win = false;
 
 // Define Random Number Function --- used to establish each enemy's speed
 
@@ -41,7 +42,7 @@ Enemy.prototype.update = function(dt) {
 // If our enemy moves the end of the canvas, start him over on the other side
 // with a new randomly generated speed and in a randomly generated row
 // Otherwise, move the enemy from left to right at the randomly generated speed
-// and call function to check for collissions with the player
+// and call function to check for collisions with the player
 
     if (this.x >= ctx.canvas.width) {
         this.x = -100;
@@ -59,8 +60,8 @@ Enemy.prototype.CollisionCheck = function () {
     for (i in allEnemies) {        
         if (player.x > (allEnemies[i].x-60) && player.x < (allEnemies[i].x + 60))   {
             if (player.y >= (allEnemies[i].y +10) && player.y <= (allEnemies[i].y + 55)) {
-                reason = "Collision"
-                pauseResetGame(reason, 1000);
+                collision = true;
+                pauseResetGame(collision, 3000);
             }
         }
     }
@@ -91,24 +92,36 @@ Player.prototype.handleInput = function(key) {
     var Y = this.y;
 
     if (key === 'left') {
-      X -= 101;
+        X -= 101;
     }
     if (key === 'up') {
-      Y -= 83;
+        Y -= 83;
+        console.log(Y);
     }
     if (key === 'right') {
-      X += 101;
+        X += 101;
     }
     if (key === 'down') {
-      Y += 83;
+        Y += 83;
+        // console.log(Y);
     }
     if (X > 0 && X < (ctx.canvas.width - 80)) {
-      this.x = X;
+        this.x = X;
     }
     if (Y > -50 && Y < (ctx.canvas.height - 125)) {
-      this.y = Y;
+        this.y = Y;
     }
 }
+
+// function checkForWin(y) {
+//     console.log(y);
+//     if (y < -9) {
+//         player.render();
+//         collision = false;
+//         console.log("I'm going to reset game because of a win")
+//         pauseResetGame(collision, 1000);
+//     }
+// }
 
 // Update the enemy's position, required method for game
 // Parameter: dt, a time delta between ticks
@@ -118,14 +131,33 @@ Player.prototype.update = function(dt) {
 // You should multiply any movement by the dt parameter
 // which will ensure the game runs at the same speed for
 // all computers.
+
     this.x * dt; 
     this.y * dt;
+
+    if (collision) {
+        console.log("Oh Man");
+        ctx.fillStyle = "black";
+        ctx.font = "bold 30px Calibri";
+        ctx.fillText(" Oh Man ", 300, 300);
+    } else {
+        // console.log("Winner, Winner - Chicken Dinner");
+    }
 }
 
 // Draw the player on the screen, required method for game
+// and check to see if we have won the game by getting to the water
+// We'll pause, display a message and reset the game if we've won
 
 Player.prototype.render = function() {
     ctx.drawImage(Resources.get(this.sprite), this.x, this.y);
+    if (this.y === -10) {
+        win = true;
+        console.log("I'm going to reset game because of a win");
+        this.sprite = 'images/char-cat-girl.png';
+        ctx.drawImage(Resources.get(this.sprite), this.x, this.y);
+        pauseResetGame(collision, 3000);
+    }
 }
 
 // Instantiate the player object
@@ -140,25 +172,29 @@ var enemy3 = new Enemy(colStart, row3);
 
 var allEnemies = [enemy1, enemy2, enemy3];
 
-// Upon a win or a collission pause to display message and then reset game
+// Upon a win or a collision pause to display message and then reset game
 
-function pauseResetGame(reason, ms) {
+function pauseResetGame(collision, ms) {
     
-    if (reason = "Collision") {
-        alert("Oh Man");
-    } else {
-        alert("Winner, Winner - Chicken Dinner");
-    }
+    // if (collision) {
+    //     console.log("Oh Man");
+    //     ctx.fillStyle = "black";
+    //     ctx.font = "bold 30px Calibri";
+    //     ctx.fillText(" Oh Man ", 300, 300);
+    // } else {
+    //     // console.log("Winner, Winner - Chicken Dinner");
+    // }
 
     ms += new Date().getTime();
     while (new Date() < ms) { }
-
+    collision = false;
+    win = false;
     player.x = player.startX;
     player.y = player.startY;
 
     while (allEnemies.length > 3) {    
         allEnemies.pop(); 
-    }     
+    } 
 } 
 
 // This listens for key presses and sends the keys to your
