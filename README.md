@@ -11,6 +11,21 @@ This is a fun and easy game that anyone will enjoy.
 
 
 
+I used several resources in completing project 3 including but not limited to the following:
+
+Went through all class materials multiple times.
+Went through office hours related to project 3 multiple times.
+Reviewed Piazza materials.
+Reviewed and submitted several topics using the Udacity discussion forum.
+Reviewed several web sites, including but not limited to:
+	stackoverflow for several issues
+	MDN
+	google style guide
+	elequent javascript
+	w3 schools
+	codeacademy
+	tuts
+
 Students should use this rubric: https://www.udacity.com/course/viewer#!/c-ud015/l-3072058665/m-3072588797
 
 for self-checking their submission.
