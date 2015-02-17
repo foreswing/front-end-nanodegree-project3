@@ -44,9 +44,15 @@ var Engine = (function(global) {
 
         /* Call our update/render functions, pass along the time delta to
          * our update function since it may be used for smooth animation.
+         * we skip the update if we've won or lost the game so our player and
+         * enemy movements are halted until the game is reset
          */
-        update(dt);
+        if (! lose && ! winGame){
+            update(dt);
+        }
+
         render();
+        
 
         /* Set our lastTime variable which is used to determine the time delta
          * for the next time this function is called.
@@ -56,7 +62,16 @@ var Engine = (function(global) {
         /* Use the browser's requestAnimationFrame function to call this
          * function again as soon as the browser is able to draw another frame.
          */
+
         win.requestAnimationFrame(main);
+
+        /* Here's where we increment our frame count for each iteration of the main
+         * function.  We later use this to pause for 3 seconds on a win or a loss so
+         * we can display a different player image accordingly.
+         */
+
+        frameCount += 1;
+
     };
 
     /* This function does some initial setup that should only occur once,
@@ -138,6 +153,7 @@ var Engine = (function(global) {
 
 
         renderEntities();
+
     }
 
     /* This function is called by the render function and is called on each game
@@ -152,7 +168,8 @@ var Engine = (function(global) {
             enemy.render();
         });
 
-        player.render();
+        player.render();            
+
     }
 
     /* This function does nothing but it could have been a good place to
@@ -167,14 +184,20 @@ var Engine = (function(global) {
      * draw our game level. Then set init as the callback method, so that when
      * all of these images are properly loaded our game will start.
      */
+
+    /* Added the last two images to be used in place of the standard player image
+     * whenever the game is won (gets to water with no collision) or lost (collision 
+     * with enemy).
+     */
+
     Resources.load([
         'images/stone-block.png',
         'images/water-block.png',
         'images/grass-block.png',
         'images/enemy-bug.png',
         'images/char-boy.png',
-        'images/char-cat-girl.png',
-        'images/char-horn-girl.png'
+        'images/char-boyWin.jpg',
+        'images/char-boyLose.jpg'
     ]);
 
     Resources.onReady(init);

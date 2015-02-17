@@ -1,14 +1,27 @@
 // Define Global Variables
 
-colStart = -100;
-row1 = 63;
-row2 = 146;
-row3 = 229;
-rowStart = [row1, row2, row3];
-enemyMinSpeed = 250;
-enemyMaxSpeed = 550;
-collision = false;
-win = false;
+// This set of variables is self-explanatory
+
+var ENEMY_COLUMN_START = -100;
+var ENEMY_ROW1_START = 63;
+var ENEMY_ROW2_START = 146;
+var ENEMY_ROW3_START = 229;
+var rowStart = [ENEMY_ROW1_START, ENEMY_ROW2_START, ENEMY_ROW3_START];
+var enemyMinSpeed = 250;
+var enemyMaxSpeed = 550;
+var collision = false;
+var winGame = false;
+var lose = false;
+
+// These three variables are used when we pause the game upon either a
+// collision or a win.  There are approximately 60 frames per second so
+// we will set endPauseFrameCount to frameCount + 180 later on to provide
+// a 3 second pause on a collision or a win.  The frameCount variable is 
+// incremented in Engine.js in the (main) function.
+
+var frameCount = 0;
+var pauseFrameCount = false;
+var endPauseFrameCount = 0;
 
 // Define Random Number Function --- used to establish each enemy's speed
 
@@ -24,8 +37,8 @@ var Enemy = function(x,y) {
     this.y = y; 
     this.speed = getRandomNumber(enemyMinSpeed, enemyMaxSpeed) - 100;
 
-    // The image/sprite for our enemies, this uses
-    // a helper we've provided to easily load images
+// The image/sprite for our enemies, this uses
+// a helper we've provided to easily load images
 
     this.sprite = 'images/enemy-bug.png';
 }
@@ -42,7 +55,7 @@ Enemy.prototype.update = function(dt) {
 // If our enemy moves the end of the canvas, start him over on the other side
 // with a new randomly generated speed and in a randomly generated row
 // Otherwise, move the enemy from left to right at the randomly generated speed
-// and call function to check for collisions with the player
+// and call a function to check for collisions with the player
 
     if (this.x >= ctx.canvas.width) {
         this.x = -100;
@@ -54,14 +67,15 @@ Enemy.prototype.update = function(dt) {
     }
 }
 
-// Check to see if any of our enemies has collided with our player
+// Function to check to see if any of our enemies has collided with our player
 
 Enemy.prototype.CollisionCheck = function () {
     for (i in allEnemies) {        
         if (player.x > (allEnemies[i].x-60) && player.x < (allEnemies[i].x + 60))   {
             if (player.y >= (allEnemies[i].y +10) && player.y <= (allEnemies[i].y + 55)) {
                 collision = true;
-                pauseResetGame(collision, 3000);
+                lose = true;
+                endPauseFrameCount = frameCount + 180;
             }
         }
     }
@@ -94,69 +108,70 @@ Player.prototype.handleInput = function(key) {
     if (key === 'left') {
         X -= 101;
     }
+
     if (key === 'up') {
         Y -= 83;
-        console.log(Y);
     }
+
     if (key === 'right') {
         X += 101;
     }
+
     if (key === 'down') {
         Y += 83;
-        // console.log(Y);
     }
+
+// Only move our player by setting this.x to the new X value if the player is
+// still within the canvas boundaries ... boundaries derived based on trial & error
+
     if (X > 0 && X < (ctx.canvas.width - 80)) {
         this.x = X;
     }
+
     if (Y > -50 && Y < (ctx.canvas.height - 125)) {
         this.y = Y;
     }
-}
 
-// function checkForWin(y) {
-//     console.log(y);
-//     if (y < -9) {
-//         player.render();
-//         collision = false;
-//         console.log("I'm going to reset game because of a win")
-//         pauseResetGame(collision, 1000);
-//     }
-// }
+// Check to see if our player has made it safely to the water and if so, go execute win game
+// functionality by setting variables accordingly.  We set the endPauseFrameCount to enable a 
+// 3 second pause when the player wins
+
+     if (Y < -9) {
+        winGame = true;
+        endPauseFrameCount = frameCount + 180;
+        Y += 60;
+        this.y = Y;
+    }
+}
 
 // Update the enemy's position, required method for game
 // Parameter: dt, a time delta between ticks
 
 Player.prototype.update = function(dt) {
 
-// You should multiply any movement by the dt parameter
-// which will ensure the game runs at the same speed for
-// all computers.
-
-    this.x * dt; 
-    this.y * dt;
-
-    if (collision) {
-        console.log("Oh Man");
-        ctx.fillStyle = "black";
-        ctx.font = "bold 30px Calibri";
-        ctx.fillText(" Oh Man ", 300, 300);
-    } else {
-        // console.log("Winner, Winner - Chicken Dinner");
-    }
 }
 
-// Draw the player on the screen, required method for game
-// and check to see if we have won the game by getting to the water
-// We'll pause, display a message and reset the game if we've won
+// Draw the player on the screen, required method for game.
+// We'll draw a different player if we've lost based on a collision
+// or won based on getting to the water.  For both a win or a loss, we'll
+// execute the resetGameCheck function to pause and reset all of our variables.
 
 Player.prototype.render = function() {
-    ctx.drawImage(Resources.get(this.sprite), this.x, this.y);
-    if (this.y === -10) {
-        win = true;
-        console.log("I'm going to reset game because of a win");
-        this.sprite = 'images/char-cat-girl.png';
+
+    if (! lose && ! winGame){
         ctx.drawImage(Resources.get(this.sprite), this.x, this.y);
-        pauseResetGame(collision, 3000);
+    }
+
+    if (lose) {
+        pauseFrameCount = true;
+        ctx.drawImage(Resources.get('images/char-boyLose.jpg'), this.x, this.y);
+        resetGameCheck();       
+    }
+
+    if (winGame) {
+        pauseFrameCount = true;
+        ctx.drawImage(Resources.get('images/char-boyWin.jpg'), this.x, this.y);
+        resetGameCheck();  
     }
 }
 
@@ -166,39 +181,39 @@ var player =  new Player(203, 405);
 
 // Instantiate all enemy objects and place in an array called allEnemies
 
-var enemy1 = new Enemy(colStart, row1);
-var enemy2 = new Enemy(colStart, row2);
-var enemy3 = new Enemy(colStart, row3);
+var enemy1 = new Enemy(ENEMY_COLUMN_START, ENEMY_ROW1_START);
+var enemy2 = new Enemy(ENEMY_COLUMN_START, ENEMY_ROW2_START);
+var enemy3 = new Enemy(ENEMY_COLUMN_START, ENEMY_ROW3_START);
 
 var allEnemies = [enemy1, enemy2, enemy3];
 
-// Upon a win or a collision pause to display message and then reset game
+// If we've paused our game due to either a win or a loss, this is where we pause for 
+// 3 seconds (180 frames) and then reset all of our player and enemy variables to start
+// a new game.
 
-function pauseResetGame(collision, ms) {
-    
-    // if (collision) {
-    //     console.log("Oh Man");
-    //     ctx.fillStyle = "black";
-    //     ctx.font = "bold 30px Calibri";
-    //     ctx.fillText(" Oh Man ", 300, 300);
-    // } else {
-    //     // console.log("Winner, Winner - Chicken Dinner");
-    // }
+function resetGameCheck() {
 
-    ms += new Date().getTime();
-    while (new Date() < ms) { }
-    collision = false;
-    win = false;
-    player.x = player.startX;
-    player.y = player.startY;
+    // ms += new Date().getTime();
+    // while (new Date() < ms) {};
 
-    while (allEnemies.length > 3) {    
-        allEnemies.pop(); 
-    } 
-} 
+    if (pauseFrameCount) {
+        if (frameCount > endPauseFrameCount) {
+            pauseFrameCount = false;
+            collision = false;
+            lose = false;
+            winGame = false;
+            player.x = player.startX;
+            player.y = player.startY;
 
-// This listens for key presses and sends the keys to your
-// Player.handleInput() method. You don't need to modify this.
+            while (allEnemies.length > 3) {    
+                allEnemies.pop();
+            } 
+        }
+    }
+}
+
+// This is where we listen for the keypress event and call our function to move our player
+// as long as we haven't had a collision (lost the game) or made it to the water (won the game).
 
 document.addEventListener('keyup', function(e) {
     var allowedKeys = {
@@ -207,6 +222,7 @@ document.addEventListener('keyup', function(e) {
         39: 'right',
         40: 'down'
     };
-
-    player.handleInput(allowedKeys[e.keyCode]);
+    if (! lose && ! winGame){
+        player.handleInput(allowedKeys[e.keyCode]);
+    }
 });
