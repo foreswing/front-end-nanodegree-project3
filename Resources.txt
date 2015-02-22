@@ -1,0 +1,12 @@
+Went through all class materials multiple times. 
+Went through office hours related to project 3 multiple times. 
+Reviewed Piazza materials. 
+Reviewed and submitted several topics using the Udacity discussion forum. 
+Reviewed several web sites, including but not limited to: 
+	stackoverflow for several issues 
+	MDN 
+	google style guide 
+	elequent javascript 
+	w3 schools 
+	codeacademy 
+	tuts
